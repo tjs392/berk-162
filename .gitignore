@@ -9,8 +9,5 @@ build/
 .vscode/
 .idea/
 *.swp
+*.swo
 .DS_Store
-
-# Obsidian internal state (keep config, drop workspace state)
-.obsidian/workspace*
-.obsidian/cache
