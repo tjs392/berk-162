@@ -1,0 +1,16 @@
+# Build artifacts
+*.o
+*.a
+*.elf
+*.bin
+build/
+
+# Editor cruft
+.vscode/
+.idea/
+*.swp
+.DS_Store
+
+# Obsidian internal state (keep config, drop workspace state)
+.obsidian/workspace*
+.obsidian/cache
