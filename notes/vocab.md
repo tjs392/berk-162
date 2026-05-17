@@ -7,6 +7,12 @@ Search with `Ctrl+F`.
 
 ## A
 
+### Absolute vs. Relative Path
+An **absolute path** (`/home/oski/cs162`) is resolved from the
+filesystem root and ignores the current working directory. A
+**relative path** (`index.html`, `./index.html`) is resolved against
+the process's CWD.
+
 ### Address Space
 The set of memory addresses a program can access, plus the state
 associated with them. May be virtual (translated by hardware) or
@@ -39,6 +45,14 @@ Firmware that provides standardized low-level services on top of
 hardware at boot time. Largely replaced by UEFI in modern systems,
 but the concept is the same: a bridge between raw hardware and the
 OS boot process.
+
+### Buffering (I/O)
+Accumulating I/O data in memory rather than transferring it
+immediately. Happens at **two independent layers**: the **user level**
+(libc, inside the `FILE*`) and the **kernel level** (transparent to
+the user). Exists for performance (a syscall costs ~25× a function
+call) and functionality (e.g. read-until-newline, which the kernel
+can't do). See also: *Stream*, *fflush*.
 
 ---
 
@@ -74,6 +88,10 @@ any given time. Covered in lectures 11–13.
 Code that exactly one thread may execute at a time. Achieved through
 mutual exclusion (typically a lock).
 
+### CWD (Current Working Directory)
+The directory a process treats as its starting point for resolving
+relative paths. Changed with the `chdir` syscall.
+
 ---
 
 ## D
@@ -84,10 +102,21 @@ device. Usually runs in kernel mode. The most unreliable part of
 most operating systems because it's often written by hardware
 vendors against complex, quirky hardware.
 
+### Directory
+A folder containing files and other directories. Provides
+hierarchical naming — a file is reached by a path through the
+directory graph.
+
 ### Dual-Mode Operation
 Hardware-enforced separation between **user mode** (restricted) and
 **kernel mode** (unrestricted). Prevents user programs from
 directly manipulating hardware, page tables, or kernel memory.
+
+### dup / dup2
+Syscalls that duplicate a file descriptor. `dup(fd)` returns a new
+fd (lowest available) pointing at the same open file description.
+`dup2(fd, target)` makes a *specific* fd number point there (closing
+it first if open). The mechanism behind shell I/O redirection.
 
 ---
 
@@ -113,14 +142,33 @@ recent operation (was the result zero, negative, did it overflow,
 etc). Branch instructions (`jz`, `jnz`, `jl`) read these flags.
 Saved/restored during context switches.
 
+### "Everything is a File"
+The defining Unix design principle: disks, devices, terminals,
+networking, and IPC all expose the *same* interface
+(`open`/`read`/`write`/`close`). Lets a program work with any of them
+without code changes.
+
 ---
 
 ## F
 
+### fflush
+Forces libc to flush a stream's user-level buffer to the kernel
+immediately, instead of waiting for the buffer to fill, a newline, or
+program exit. Use it to make I/O happen exactly when you need it.
+
 ### File
 The OS abstraction over disk blocks, networked storage, or other
 persistent media. Presents a uniform read/write interface
-regardless of the underlying device.
+regardless of the underlying device. Has **data** (a byte sequence)
+and **metadata** (size, owner, timestamps, permissions).
+
+### File Descriptor
+An opaque non-negative integer the kernel hands a process to refer to
+an open file. Indexes into the process's file descriptor table. The
+user gets an integer rather than a kernel pointer for security — a
+number can't be used to reach into kernel memory. Standard ones:
+`0` = stdin, `1` = stdout, `2` = stderr.
 
 ### fork
 A syscall that creates a new process by copying the current one. The
@@ -177,6 +225,11 @@ other process descends from it via `fork`. Solves the bootstrapping
 problem (processes are created by other processes — but something has
 to be first).
 
+### Inode
+The on-disk data structure describing where a file's data lives and
+its metadata. An open file description references the inode of the
+file it has open. (Internals covered in the File Systems lectures.)
+
 ### Interrupt
 An asynchronous event from hardware that diverts execution to a
 handler in kernel mode. Examples: timer ticks, disk I/O completion,
@@ -186,6 +239,11 @@ keyboard input.
 A table indexed by interrupt number. Each entry holds the address
 of that interrupt's handler. The hardware uses it to jump to the
 right handler when an interrupt fires.
+
+### ioctl
+"I/O control" — a catch-all syscall for device-specific operations
+that don't fit the uniform `read`/`write` model (e.g. setting a
+terminal's mode or a device's baud rate).
 
 ### ISA (Instruction Set Architecture)
 The interface between hardware and software at the instruction
@@ -218,6 +276,11 @@ holding thread). `mutex` = "mutual exclusion."
 ---
 
 ## M
+
+### Metadata (file)
+Information *about* a file, as opposed to its contents: size,
+modification time, owner, permissions, and other access-control
+information.
 
 ### MMU (Memory Management Unit)
 Hardware that translates virtual addresses to physical addresses
@@ -256,6 +319,18 @@ runs. Makes concurrency bugs hard to reproduce and test for.
 
 ---
 
+## O
+
+### Open File Description
+A kernel object representing one instance of an open file. Holds the
+**inode reference** (where the file is) and the **current offset**
+(position within the file). File descriptors point *to* these. Across
+`fork`, parent and child fds are **aliased** to the *same* open file
+description — so they share the offset — and it's **reference-counted**,
+freed only when all referencing fds close.
+
+---
+
 ## P
 
 ### Page
@@ -282,10 +357,17 @@ The kernel's record of everything it needs to know about a process:
 its address space, open files, TCBs for its threads, scheduling
 state, and parent/child relationships.
 
+### Pipe
+A one-way in-kernel communication channel. `pipe(int pipefd[2])`
+creates it and returns two fds: `pipefd[0]` (read end) and
+`pipefd[1]` (write end). Combined with `fork`, it lets a parent and
+child communicate — the basis of shell pipelines (`cmd1 | cmd2`).
+
 ### POSIX
 A standard that defines a common system call interface across
 operating systems, so programs can be portable. The `p` in
-`pthreads` stands for POSIX.
+`pthreads` stands for POSIX. Expands to "Portable Operating System
+Interface for uniX."
 
 ### Process
 An instance of a running program. Consists of a protected address
@@ -319,6 +401,12 @@ and managing threads. Key calls: `pthread_create`, `pthread_join`,
 The OS mediates access to shared resources (CPU, memory, devices)
 and enforces protection between processes.
 
+### Reference Count
+A count of how many things currently refer to a shared resource. The
+resource is freed only when the count drops to zero. Used for open
+file descriptions: `close` decrements the count; the description
+survives until every referencing fd is closed.
+
 ### Resident (thread)
 A thread is *resident* when its state is loaded into a physical
 processor and it's currently executing. Otherwise it's
@@ -345,6 +433,18 @@ heap segment, stack segment.
 The user-visible name for a memory access violation. The MMU
 detected an illegal access, the OS killed the process.
 
+### Semaphore
+A generalized lock holding a non-negative value, with two atomic
+operations: `P()` / `down()` (wait until value > 0, then decrement)
+and `V()` / `up()` (increment, waking a waiter). Initial value 1 →
+mutual exclusion; initial value 0 → signaling between threads.
+
+### Signal
+An asynchronous notification delivered to a process (e.g. `SIGINT`
+from Ctrl-C, `SIGTERM`, `SIGKILL`). A process can install a handler
+via `sigaction`; otherwise a default action runs (often termination).
+`SIGKILL` and `SIGSTOP` cannot be caught or ignored.
+
 ### Socket
 The OS abstraction over networking. Presents a read/write interface
 over network connections, hiding TCP/IP and hardware details.
@@ -353,6 +453,12 @@ over network connections, hiding TCP/IP and hardware details.
 The region of an address space holding function call frames, local
 variables, and return addresses. Grows downward as functions are
 called.
+
+### Stream
+The high-level C I/O abstraction — a `FILE*` returned by `fopen`.
+Wraps a file descriptor with a user-level buffer, a lock, and
+bookkeeping. Operated on by `fread`, `fwrite`, `fprintf`, `fseek`,
+etc. Contrast with raw file descriptors.
 
 ### Supervisor Mode
 Synonym for **kernel mode**.
@@ -430,4 +536,13 @@ between them. Enables protection, sharing, paging, and more.
 
 ---
 
-🔗 **Linked from:** [[01-what-is-an-os]] · [[02-four-concepts]] · [[03-threads-and-processes]]
+## W
+
+### wait / waitpid
+Syscalls that let a parent process block until a child terminates,
+retrieving the child's exit status. Used by shells: fork a child to
+run a command, then `wait` for it to finish.
+
+---
+
+🔗 **Linked from:** [[01-what-is-an-os]] · [[02-four-concepts]] · [[03-threads-and-processes]] · [[04-files-and-io]]
