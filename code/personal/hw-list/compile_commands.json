@@ -1,0 +1,103 @@
+[
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-g3",
+      "-pthread",
+      "-Wall",
+      "-std=gnu99",
+      "-c",
+      "-o",
+      "pthread.o",
+      "pthread.c"
+    ],
+    "directory": "/home/workspace/code/personal/hw-list",
+    "file": "/home/workspace/code/personal/hw-list/pthread.c",
+    "output": "/home/workspace/code/personal/hw-list/pthread.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-g3",
+      "-pthread",
+      "-Wall",
+      "-std=gnu99",
+      "-DPINTOS_LIST",
+      "-c",
+      "-o",
+      "word_count_l.o",
+      "word_count_l.c"
+    ],
+    "directory": "/home/workspace/code/personal/hw-list",
+    "file": "/home/workspace/code/personal/hw-list/word_count_l.c",
+    "output": "/home/workspace/code/personal/hw-list/word_count_l.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-g3",
+      "-pthread",
+      "-Wall",
+      "-std=gnu99",
+      "-c",
+      "-o",
+      "list.o",
+      "list.c"
+    ],
+    "directory": "/home/workspace/code/personal/hw-list",
+    "file": "/home/workspace/code/personal/hw-list/list.c",
+    "output": "/home/workspace/code/personal/hw-list/list.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-g3",
+      "-pthread",
+      "-Wall",
+      "-std=gnu99",
+      "-c",
+      "-o",
+      "debug.o",
+      "debug.c"
+    ],
+    "directory": "/home/workspace/code/personal/hw-list",
+    "file": "/home/workspace/code/personal/hw-list/debug.c",
+    "output": "/home/workspace/code/personal/hw-list/debug.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-g3",
+      "-pthread",
+      "-Wall",
+      "-std=gnu99",
+      "-DPINTOS_LIST",
+      "-DPTHREADS",
+      "-c",
+      "-o",
+      "pwords.o",
+      "pwords.c"
+    ],
+    "directory": "/home/workspace/code/personal/hw-list",
+    "file": "/home/workspace/code/personal/hw-list/pwords.c",
+    "output": "/home/workspace/code/personal/hw-list/pwords.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-g3",
+      "-pthread",
+      "-Wall",
+      "-std=gnu99",
+      "-DPINTOS_LIST",
+      "-DPTHREADS",
+      "-c",
+      "-o",
+      "word_count_p.o",
+      "word_count_p.c"
+    ],
+    "directory": "/home/workspace/code/personal/hw-list",
+    "file": "/home/workspace/code/personal/hw-list/word_count_p.c",
+    "output": "/home/workspace/code/personal/hw-list/word_count_p.o"
+  }
+]
